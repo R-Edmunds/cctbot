@@ -25,27 +25,27 @@ dummies = [
         ["irma seeley", ["e-seeley", "e-seele2", "e-seeley3"]],
         ["kari comstock", ["e-comstock", "e-comstoc2", "e-comstock3"]],
         ["maye petree", ["e-petree1", "e-petree2", "e-petree13"]],
-        ["jone mccrady", ["e-mccrady", "e-mccrad2", "e-mccrady3"]],
-        ["corrinne eastin", ["e-eastin", "e-easti2",]],
-        ["roseann pruneda", ["e-pruneda", "e-pruned2",]],
-        ["peg carithers", ["e-carithers", "e-carither2", "e-carithers3"]],
-        ["yang castillo", ["e-castillo", "e-castill2", "e-castillo3"]],
-        ["margene hobgood", ["e-hobgood", "e-hobgoo2", "e-hobgood3"]],
-        ["ruben folse", ["e-folse", "e-fols2", "e-folse3"]],
-        ["merle holtsclaw", ["e-holtsclaw", "e-holtscla2", "e-holtsclaw3"]],
-        ["ginger hans", ["e-hans", "e-han2", "e-hans3"]],
-        ["cyril haubert", ["e-haubert", "e-hauber2",]],
-        ["morris jelks", ["e-jelks", "e-jelk2",]],
-        ["felicita donlon", ["e-donlon", "e-donlo2", "e-donlon3"]],
-        ["lauryn darner", ["e-darner", "e-darne2",]],
-        ["kortney rawles", ["e-rawles", "e-rawle2", "e-rawles3"]],
-        ["antoine metzger", ["e-metzger",]],
-        ["birgit fannin", ["e-fannin", "e-fanni2", "e-fannin3"]],
-        ["ezequiel callison", ["e-callison", "e-calliso2", "e-callison3"]],
-        ["carissa flaugher", ["e-flaugher",]],
-        ["nettie castille", ["e-castille", "e-castill2", "e-castille3"]],
-        ["natisha deforge", ["e-deforge", "e-deforg2", "e-deforge3"]],
-        ["antonina defoor", ["e-defoor", "e-defoo2", "e-defoor3"]],
+        # ["jone mccrady", ["e-mccrady", "e-mccrad2", "e-mccrady3"]],
+        # ["corrinne eastin", ["e-eastin", "e-easti2",]],
+        # ["roseann pruneda", ["e-pruneda", "e-pruned2",]],
+        # ["peg carithers", ["e-carithers", "e-carither2", "e-carithers3"]],
+        # ["yang castillo", ["e-castillo", "e-castill2", "e-castillo3"]],
+        # ["margene hobgood", ["e-hobgood", "e-hobgoo2", "e-hobgood3"]],
+        # ["ruben folse", ["e-folse", "e-fols2", "e-folse3"]],
+        # ["merle holtsclaw", ["e-holtsclaw", "e-holtscla2", "e-holtsclaw3"]],
+        # ["ginger hans", ["e-hans", "e-han2", "e-hans3"]],
+        # ["cyril haubert", ["e-haubert", "e-hauber2",]],
+        # ["morris jelks", ["e-jelks", "e-jelk2",]],
+        # ["felicita donlon", ["e-donlon", "e-donlo2", "e-donlon3"]],
+        # ["lauryn darner", ["e-darner", "e-darne2",]],
+        # ["kortney rawles", ["e-rawles", "e-rawle2", "e-rawles3"]],
+        # ["antoine metzger", ["e-metzger",]],
+        # ["birgit fannin", ["e-fannin", "e-fanni2", "e-fannin3"]],
+        # ["ezequiel callison", ["e-callison", "e-calliso2", "e-callison3"]],
+        # ["carissa flaugher", ["e-flaugher",]],
+        # ["nettie castille", ["e-castille", "e-castill2", "e-castille3"]],
+        # ["natisha deforge", ["e-deforge", "e-deforg2", "e-deforge3"]],
+        # ["antonina defoor", ["e-defoor", "e-defoo2", "e-defoor3"]],
     ]
 
 
@@ -67,6 +67,7 @@ def CCTu(nick, char):
         session.add(add)
         print("-- You are now on the CCT list, with a new EVE character. Good luck!")
     else:
+        # user exists
         entered = session.query(Entrants).join(Twitch)\
                     .filter(Twitch.name==nick).scalar()
         char_exists = session.query(Eve).join(Twitch)\
@@ -138,13 +139,18 @@ def CCTremove(nick):
     return
 
 def CCTgetchars(nick):
-    qry = session.query(Eve.char).join(Twitch)\
-            .filter(Twitch.name==nick).all()
-    list = []
-    for row in qry:
-        list.append(row[0])
-    string = ", ".join(list)
-    print("-- Your associated EVE character(s):  {}".format( string.title() ))
+    c = session.query(Eve.id).join(Twitch).filter(Twitch.name==nick).count()
+    if c > 0:
+        qry = session.query(Eve.char).join(Twitch)\
+                .filter(Twitch.name==nick).all()
+        list = []
+        for row in qry:
+            list.append(row[0])
+        string = ", ".join(list)
+        print("-- Your associated EVE character(s):  {}".format( string.title() ))
+        return string
+    else:
+        print("-- You have no associated EVE character(s).")
 
 def CCTdelete(nick):
     scalar = session.query(Twitch).filter(Twitch.name==nick).scalar()
@@ -171,6 +177,21 @@ def CCTdummy(dummies):
     print("-- {}  dummy entries added".format( len(dummies) ))
     return
 
+def CCTroll():
+    c = CCTcount()
+    if c > 4:
+        e = session.query(Twitch.name)\
+                .filter(Entrants.twitch_id==Twitch.id).all()
+        session.close()
+        winner = random.choice(e)
+        twitch = session.query(Twitch.id).filter(Twitch.name==winner[0]).one()
+        session.query(Entrants).filter(Entrants.twitch_id==twitch.id).delete()
+        session.commit()
+        print("-- WINNER:  {} - EVE chars:  {}".format( winner[0].title(), CCTgetchars(winner[0]).title() ))
+    else:
+        print("-- There are {} entrants. Get 5 or more before rolling. EVE am ded?!".format(c))
+
+
 def main():
     # define cmds in regex
     r_cctu = re.compile("^!cct\s...", re.IGNORECASE)
@@ -184,17 +205,17 @@ def main():
     r_cctchars = re.compile("^!cctchars$", re.IGNORECASE)
     r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
     r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
-    r_cctabout = re.compile("^!cctabout$", re.IGNORECASE)
     ADMIN = re.compile("^admin$", re.IGNORECASE)
 
     while True:
         print("Select irc nick: -\n\n"
             + "  1. admin\n"
             + "  2. fred\n"
-            + "  3. geoff\n\n"
+            + "  3. geoff\n"
+            + "  4. anarchicuk\n\n"
         )
-        slcn = "2"
-        # slcn = input("Selection:  ")
+        # slcn = "2"
+        slcn = input("Selection:  ")
 
         if slcn == "1":
             nick = "admin"
@@ -205,12 +226,13 @@ def main():
         elif slcn == "3":
             nick = "geoff"
             break
+        elif slcn == "4":
+            nick = "anarchicuk"
+            break
         os.system('cls')  # on windows
     os.system('cls')  # on windows
 
     while True:
-        connectDB()
-        session.execute("PRAGMA foreign_keys=ON")
         msg = input("{}:  ".format(nick)).lower()
 
         msg_list = msg.split(" ")
@@ -218,31 +240,30 @@ def main():
         msg_list.remove(msg_list[0])
         char = " ".join(msg_list)
 
+        connectDB()
+        session.execute("PRAGMA foreign_keys=ON")
+
         if r_cctu.match(msg):
-            print(char.upper())
             CCTu(nick, char)
         elif r_cct.match(cmd):
             CCT(nick)
-        elif r_cctreset.match(cmd):
-            CCTreset()
-        elif r_cctroll.match(cmd):
-            pass
         elif r_cctcount.match(cmd):
             CCTcount()
         elif r_cctremove.match(cmd):
             CCTremove(nick)
-        elif r_cctdummy.match(cmd):
-            CCTdummy(dummies)
-        elif r_cctchar.match(cmd):
-            CCTgetchars(nick)
-        elif r_cctchars.match(cmd):
+        elif r_cctchar.match(cmd) or r_cctchars.match(cmd):
             CCTgetchars(nick)
         elif r_cctdelete.match(cmd):
             CCTdelete(nick)
         elif r_ccthelp.match(cmd):
-            pass
-        elif r_cctabout.match(cmd):
-            pass
+            pass # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        # admin only cmds
+        elif r_cctreset.match(cmd):
+            CCTreset()
+        elif r_cctroll.match(cmd):
+            CCTroll()
+        elif r_cctdummy.match(cmd):
+            CCTdummy(dummies)
         else:
             print("-- no match")
         session.close()
