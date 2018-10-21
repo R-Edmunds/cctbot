@@ -110,6 +110,28 @@ def CCT(nick):
             print("-- You are now on the CCT list. Good luck!")
     return
 
+def CCTreset():
+    session.query(Entrants).delete()
+    session.commit()
+    return
+
+def CCTcount():
+    count = session.query(Entrants).count()
+    print("-- There are currently {} CCT entrants.".format(count))
+    return
+
+def CCTremove(nick):
+    twitch = session.query(Twitch)\
+                .filter(Twitch.name==nick).scalar()
+    c = session.query(Entrants).filter(Entrants.twitch_id==twitch.id).count()
+    if c > 0:
+        session.query(Entrants).filter(Entrants.twitch_id==twitch.id).delete()
+        session.commit()
+        print("-- You have now been removed from the CCT list.")
+    else:
+        print("-- You were not on the CCT list.")
+    return
+
 
 
 def main():
@@ -165,13 +187,13 @@ def main():
         elif r_cct.match(cmd):
             CCT(nick)
         elif r_cctreset.match(cmd):
-            pass
+            CCTreset()
         elif r_cctroll.match(cmd):
             pass
         elif r_cctcount.match(cmd):
-            pass
+            CCTcount()
         elif r_cctremove.match(cmd):
-            pass
+            CCTremove(nick)
         elif r_cctdummy.match(cmd):
             pass
         elif r_cctchar.match(cmd):
