@@ -132,6 +132,14 @@ def CCTremove(nick):
         print("-- You were not on the CCT list.")
     return
 
+def CCTgetchars(nick):
+    qry = session.query(Eve.char)\
+            .filter(Twitch.name==nick).all()
+    list = []
+    for row in qry:
+        list.append(row[0])
+    string = ", ".join(list)
+    print("-- Your associated EVE character(s):  {}".format( string.title() ))
 
 
 def main():
@@ -197,11 +205,11 @@ def main():
         elif r_cctdummy.match(cmd):
             pass
         elif r_cctchar.match(cmd):
-            pass
+            CCTgetchars(nick)
         elif r_cctchars.match(cmd):
-            pass
+            CCTgetchars(nick)
         elif r_cctdelete.match(cmd):
-            pass
+            CCTdelete(nick)
         elif r_ccthelp.match(cmd):
             pass
         elif r_cctabout.match(cmd):
