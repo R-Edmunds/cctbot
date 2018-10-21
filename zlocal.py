@@ -8,48 +8,164 @@ from sqlalchemy.sql import exists
 from sqlalchemy.engine import Engine
 # from sqlalchemy import event
 
-from dbdev import Base, Twitch, Eve, Entrants, Wins
+from zdb import Base, Twitch, Eve, Entrants, Wins
 import random
 
+import os
+import re
+
 dummies = [
-        ["Lorene Sarvis", ["e-Sarvis", "e-Sarvi2", "e-Sarvis3"]],
-        ["Kristel Giancola", ["e-Giancola", "e-Giancol2", "e-Giancola3"]],
-        ["Loyd Crick", ["e-Crick", "e-Cric2", "e-Crick3"]],
-        ["anarchicuk", ["Sukyakka", "Natalia Blackwater", "Yuzzette Freeman"]],
-        ["Temeka Keagle", ["e-Keagle", "e-Keagl2", "e-Keagle3"]],
-        ["Helaine Gaona", ["e-Gaona", "e-Gaon2", "e-Gaona3"]],
-        ["Peggy Dengler", ["e-Dengler", "e-Dengle2", "e-Dengler3"]],
-        ["Irma Seeley", ["e-Seeley", "e-Seele2", "e-Seeley3"]],
-        ["Kari Comstock", ["e-Comstock", "e-Comstoc2", "e-Comstock3"]],
-        ["Maye Petree", ["e-Petree1", "e-Petree2", "e-Petree13"]],
-        ["Jone Mccrady", ["e-Mccrady", "e-Mccrad2", "e-Mccrady3"]],
-        ["Corrinne Eastin", ["e-Eastin", "e-Easti2",]],
-        ["Roseann Pruneda", ["e-Pruneda", "e-Pruned2",]],
-        ["Peg Carithers", ["e-Carithers", "e-Carither2", "e-Carithers3"]],
-        ["Yang Castillo", ["e-Castillo", "e-Castill2", "e-Castillo3"]],
-        ["Margene Hobgood", ["e-Hobgood", "e-Hobgoo2", "e-Hobgood3"]],
-        ["Ruben Folse", ["e-Folse", "e-Fols2", "e-Folse3"]],
-        ["Merle Holtsclaw", ["e-Holtsclaw", "e-Holtscla2", "e-Holtsclaw3"]],
-        ["Ginger Hans", ["e-Hans", "e-Han2", "e-Hans3"]],
-        ["Cyril Haubert", ["e-Haubert", "e-Hauber2",]],
-        ["Morris Jelks", ["e-Jelks", "e-Jelk2",]],
-        ["Felicita Donlon", ["e-Donlon", "e-Donlo2", "e-Donlon3"]],
-        ["Lauryn Darner", ["e-Darner", "e-Darne2",]],
-        ["Kortney Rawles", ["e-Rawles", "e-Rawle2", "e-Rawles3"]],
-        ["Antoine Metzger", ["e-Metzger",]],
-        ["Birgit Fannin", ["e-Fannin", "e-Fanni2", "e-Fannin3"]],
-        ["Ezequiel Callison", ["e-Callison", "e-Calliso2", "e-Callison3"]],
-        ["Carissa Flaugher", ["e-Flaugher",]],
-        ["Nettie Castille", ["e-Castille", "e-Castill2", "e-Castille3"]],
-        ["Natisha Deforge", ["e-Deforge", "e-Deforg2", "e-Deforge3"]],
-        ["Antonina Defoor", ["e-Defoor", "e-Defoo2", "e-Defoor3"]],
+        ["lorene sarvis", ["e-sarvis", "e-sarvi2", "e-sarvis3"]],
+        ["kristel giancola", ["e-giancola", "e-giancol2", "e-giancola3"]],
+        ["loyd crick", ["e-crick", "e-cric2", "e-crick3"]],
+        ["anarchicuk", ["sukyakka", "natalia blackwater", "yuzzette freeman"]],
+        ["temeka keagle", ["e-keagle", "e-keagl2", "e-keagle3"]],
+        ["helaine gaona", ["e-gaona", "e-gaon2", "e-gaona3"]],
+        ["peggy dengler", ["e-dengler", "e-dengle2", "e-dengler3"]],
+        ["irma seeley", ["e-seeley", "e-seele2", "e-seeley3"]],
+        ["kari comstock", ["e-comstock", "e-comstoc2", "e-comstock3"]],
+        ["maye petree", ["e-petree1", "e-petree2", "e-petree13"]],
+        ["jone mccrady", ["e-mccrady", "e-mccrad2", "e-mccrady3"]],
+        ["corrinne eastin", ["e-eastin", "e-easti2",]],
+        ["roseann pruneda", ["e-pruneda", "e-pruned2",]],
+        ["peg carithers", ["e-carithers", "e-carither2", "e-carithers3"]],
+        ["yang castillo", ["e-castillo", "e-castill2", "e-castillo3"]],
+        ["margene hobgood", ["e-hobgood", "e-hobgoo2", "e-hobgood3"]],
+        ["ruben folse", ["e-folse", "e-fols2", "e-folse3"]],
+        ["merle holtsclaw", ["e-holtsclaw", "e-holtscla2", "e-holtsclaw3"]],
+        ["ginger hans", ["e-hans", "e-han2", "e-hans3"]],
+        ["cyril haubert", ["e-haubert", "e-hauber2",]],
+        ["morris jelks", ["e-jelks", "e-jelk2",]],
+        ["felicita donlon", ["e-donlon", "e-donlo2", "e-donlon3"]],
+        ["lauryn darner", ["e-darner", "e-darne2",]],
+        ["kortney rawles", ["e-rawles", "e-rawle2", "e-rawles3"]],
+        ["antoine metzger", ["e-metzger",]],
+        ["birgit fannin", ["e-fannin", "e-fanni2", "e-fannin3"]],
+        ["ezequiel callison", ["e-callison", "e-calliso2", "e-callison3"]],
+        ["carissa flaugher", ["e-flaugher",]],
+        ["nettie castille", ["e-castille", "e-castill2", "e-castille3"]],
+        ["natisha deforge", ["e-deforge", "e-deforg2", "e-deforge3"]],
+        ["antonina defoor", ["e-defoor", "e-defoo2", "e-defoor3"]],
     ]
 
 
 def connectDB():
     global session
-    engine = create_engine('sqlite:///db.sqlite3')
+    engine = create_engine('sqlite:///zdb.sqlite3')
     Base.metadata.bind = engine
 
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
+
+def CCTu(nick, char):
+    twitch = session.query(Twitch).filter(Twitch.name==nick).scalar()
+    if twitch == None:
+        # user does not exist, add all
+        add = Twitch(name=nick)
+        add.eve = Eve(char=char)
+        add.entrants = Entrants()
+        session.add(add)
+        print("-- You have entered the CCT list with a new EVE character. Good luck!")
+    else:
+        entered = session.query(Entrants, Twitch.name)\
+                    .filter(Twitch.name==nick).scalar()
+        char = session.query(Eve, Twitch.name)\
+                    .filter(Eve.char==char)\
+                    .filter(Twitch.name==nick).scalar()
+        if entered == None and char == None:
+            # user exists, not entered, char doesnt exist
+            twitch.eve.eve.append(Eve(char=char))
+            twitch.entrants = Entrants()
+            session.add(twitch)
+            print("-- You have entered the CCT list with a new EVE character. Good luck!")
+        elif entered != None and char == None:
+            # entered but char doesnt exist
+            twitch.eve.append(Eve(char=char))
+            session.add(twitch)
+            print("-- New EVE character added. Already in CCT list. Good luck!")
+        elif entered != None and char != None:
+            # entered and char exists
+            print("-- You are already on the CCT list. Good luck!")
+        # all exists but not entered
+    session.commit()
+    return
+
+
+
+def main():
+    # define cmds in regex
+    r_cctu = re.compile("^!cct\s...", re.IGNORECASE)
+    r_cct = re.compile("^!cct$", re.IGNORECASE)
+    r_cctreset = re.compile("^!cctreset$", re.IGNORECASE)
+    r_cctroll = re.compile("^!cctroll$", re.IGNORECASE)
+    r_cctcount = re.compile("^!cctcount$", re.IGNORECASE)
+    r_cctremove = re.compile("^!cctremove$", re.IGNORECASE)
+    r_cctdummy = re.compile("^!cctdummy$", re.IGNORECASE)
+    r_cctchar = re.compile("^!cctchar$", re.IGNORECASE)
+    r_cctchars = re.compile("^!cctchars$", re.IGNORECASE)
+    r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
+    r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
+    r_cctabout = re.compile("^!cctabout$", re.IGNORECASE)
+    ADMIN = re.compile("^admin$", re.IGNORECASE)
+
+    while True:
+        print("Select irc nick: -\n\n"
+            + "  1. admin\n"
+            + "  2. fred\n"
+            + "  3. geoff\n\n"
+        )
+        slcn = input("Selection:  ")
+
+        if slcn == "1":
+            nick = "admin"
+            break
+        elif slcn == "2":
+            nick = "fred"
+            break
+        elif slcn == "3":
+            nick = "geoff"
+            break
+        os.system('cls')  # on windows
+    os.system('cls')  # on windows
+
+    while True:
+        connectDB()
+        msg = input("{}:  ".format(nick)).lower()
+
+        msg_list = msg.split(" ")
+        cmd = msg_list[0]
+        msg_list.remove(msg_list[0])
+        char = " ".join(msg_list)
+
+        if r_cctu.match(msg):
+            CCTu(nick, char)
+        elif r_cct.match(cmd):
+            pass
+        elif r_cctreset.match(cmd):
+            pass
+        elif r_cctroll.match(cmd):
+            pass
+        elif r_cctcount.match(cmd):
+            pass
+        elif r_cctremove.match(cmd):
+            pass
+        elif r_cctdummy.match(cmd):
+            pass
+        elif r_cctchar.match(cmd):
+            pass
+        elif r_cctchars.match(cmd):
+            pass
+        elif r_cctdelete.match(cmd):
+            pass
+        elif r_ccthelp.match(cmd):
+            pass
+        elif r_cctabout.match(cmd):
+            pass
+        else:
+            print("-- no match")
+        session.close()
+
+
+
+if __name__ == '__main__':
+    main()
