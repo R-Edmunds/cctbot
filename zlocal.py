@@ -67,9 +67,9 @@ def CCTu(nick, char):
         session.add(add)
         print("-- You are now on the CCT list, with a new EVE character. Good luck!")
     else:
-        entered = session.query(Entrants, Twitch.name)\
+        entered = session.query(Entrants).join(Twitch)\
                     .filter(Twitch.name==nick).scalar()
-        char_exists = session.query(Eve, Twitch.name)\
+        char_exists = session.query(Eve).join(Twitch)\
                     .filter(Eve.char==char)\
                     .filter(Twitch.name==nick).scalar()
         if entered == None and char_exists == None:
@@ -138,7 +138,7 @@ def CCTremove(nick):
     return
 
 def CCTgetchars(nick):
-    qry = session.query(Eve.char)\
+    qry = session.query(Eve.char).join(Twitch)\
             .filter(Twitch.name==nick).all()
     list = []
     for row in qry:
@@ -154,6 +154,21 @@ def CCTdelete(nick):
         print("-- All records associated with your Twitch name have been deleted.")
     else:
         print("-- No records found for your Twitch user.")
+    return
+
+def CCTdummy(dummies):
+    for row in dummies:
+        add = Twitch(name=row[0])
+        list = []
+        for char in row[1]:
+            x = Eve(char=char)
+            list.append(x)
+        add.eve = list
+        add.entrants = Entrants()
+        add.wins = [Wins()]
+        session.add(add)
+    session.commit()
+    print("-- {}  dummy entries added".format( len(dummies) ))
     return
 
 def main():
@@ -217,7 +232,7 @@ def main():
         elif r_cctremove.match(cmd):
             CCTremove(nick)
         elif r_cctdummy.match(cmd):
-            pass
+            CCTdummy(dummies)
         elif r_cctchar.match(cmd):
             CCTgetchars(nick)
         elif r_cctchars.match(cmd):
