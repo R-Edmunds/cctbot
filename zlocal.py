@@ -111,8 +111,13 @@ def CCT(nick):
     return
 
 def CCTreset():
-    session.query(Entrants).delete()
-    session.commit()
+    qry = session.query(Entrants).count()
+    if qry > 0:
+        session.query(Entrants).delete()
+        session.commit()
+        print("-- Entrant list reset successfully.")
+    else:
+        print("-- Entrant list already empty.")
     return
 
 def CCTcount():
@@ -141,6 +146,15 @@ def CCTgetchars(nick):
     string = ", ".join(list)
     print("-- Your associated EVE character(s):  {}".format( string.title() ))
 
+def CCTdelete(nick):
+    scalar = session.query(Twitch).filter(Twitch.name==nick).scalar()
+    if scalar:
+        session.delete(scalar)
+        session.commit()
+        print("-- All records associated with your Twitch name have been deleted.")
+    else:
+        print("-- No records found for your Twitch user.")
+    return
 
 def main():
     # define cmds in regex
