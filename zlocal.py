@@ -62,32 +62,52 @@ def CCTu(nick, char):
     if twitch == None:
         # user does not exist, add all
         add = Twitch(name=nick)
-        add.eve = Eve(char=char)
+        add.eve.append(Eve(char=char))
         add.entrants = Entrants()
         session.add(add)
-        print("-- You have entered the CCT list with a new EVE character. Good luck!")
+        print("-- You are now on the CCT list, with a new EVE character. Good luck!")
     else:
         entered = session.query(Entrants, Twitch.name)\
                     .filter(Twitch.name==nick).scalar()
-        char = session.query(Eve, Twitch.name)\
+        char_exists = session.query(Eve, Twitch.name)\
                     .filter(Eve.char==char)\
                     .filter(Twitch.name==nick).scalar()
-        if entered == None and char == None:
+        if entered == None and char_exists == None:
             # user exists, not entered, char doesnt exist
-            twitch.eve.eve.append(Eve(char=char))
+            twitch.eve.append(Eve(char=char))
             twitch.entrants = Entrants()
             session.add(twitch)
-            print("-- You have entered the CCT list with a new EVE character. Good luck!")
-        elif entered != None and char == None:
+            print("-- You are now on the CCT list, with a new EVE character. Good luck!")
+        elif entered == None and char_exists:
+            # all exist but not entered
+            twitch.entrants = Entrants()
+            session.add(twitch)
+            print("-- You are now on the CCT list. Good luck!")
+        elif entered and char_exists == None:
             # entered but char doesnt exist
             twitch.eve.append(Eve(char=char))
             session.add(twitch)
             print("-- New EVE character added. Already in CCT list. Good luck!")
-        elif entered != None and char != None:
+        elif entered and char_exists:
             # entered and char exists
             print("-- You are already on the CCT list. Good luck!")
-        # all exists but not entered
+        else:
+            print("-- Error:  CCTu() something went wrong")
     session.commit()
+    return
+
+def CCT(nick):
+    twitch = session.query(Twitch).filter(Twitch.name==nick).scalar()
+    if twitch == None:
+        print("-- You don't have an EVE character associated with you twitch name. Use '!cct EVE CHAR' to enter.")
+    else:
+        if twitch.entrants:
+            print("-- You are already entered. Good luck!")
+        else:
+            twitch.entrants = Entrants()
+            session.add(twitch)
+            session.commit()
+            print("-- You are now on the CCT list. Good luck!")
     return
 
 
@@ -114,7 +134,8 @@ def main():
             + "  2. fred\n"
             + "  3. geoff\n\n"
         )
-        slcn = input("Selection:  ")
+        slcn = "2"
+        # slcn = input("Selection:  ")
 
         if slcn == "1":
             nick = "admin"
@@ -130,6 +151,7 @@ def main():
 
     while True:
         connectDB()
+        session.execute("PRAGMA foreign_keys=ON")
         msg = input("{}:  ".format(nick)).lower()
 
         msg_list = msg.split(" ")
@@ -138,9 +160,10 @@ def main():
         char = " ".join(msg_list)
 
         if r_cctu.match(msg):
+            print(char.upper())
             CCTu(nick, char)
         elif r_cct.match(cmd):
-            pass
+            CCT(nick)
         elif r_cctreset.match(cmd):
             pass
         elif r_cctroll.match(cmd):
