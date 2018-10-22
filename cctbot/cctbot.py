@@ -4,15 +4,16 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import exists
-
 from sqlalchemy.engine import Engine
-# from sqlalchemy import event
 
-from cctbotdb import Base, Twitch, Eve, Entrants, Wins
 import random
-
-import os
 import re
+import sys
+sys.path.append('/srv/znc/.znc/cctbot')
+from cctbotdb import Base, Twitch, Eve, Entrants, Wins
+
+import znc
+
 
 dummies = [
         ["lorene sarvis", ["e-sarvis", "e-sarvi2", "e-sarvis3"]],
@@ -51,7 +52,7 @@ dummies = [
 
 def connectDB():
     global session
-    engine = create_engine('sqlite:///cctdb.sqlite3')
+    engine = create_engine('sqlite:////srv/znc/.znc/cctbot/cctdb.sqlite3')
     Base.metadata.bind = engine
 
     DBSession = sessionmaker(bind=engine)

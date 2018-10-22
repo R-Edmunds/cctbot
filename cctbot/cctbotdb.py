@@ -56,5 +56,5 @@ class Wins(Base):
                          cascade='all,delete-orphan'))
 
 
-engine = create_engine('sqlite:///cctdb.sqlite3')
+engine = create_engine('sqlite:////srv/znc/.znc/cctbot/cctdb.sqlite3')
 Base.metadata.create_all(engine)
