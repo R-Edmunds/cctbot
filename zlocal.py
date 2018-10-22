@@ -253,7 +253,7 @@ def main():
     r_cctwins = re.compile("^!cctwins$", re.IGNORECASE)
     r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
     r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
-    ADMIN = re.compile("^admin$", re.IGNORECASE)
+    r_ADMIN = re.compile("^anarchicuk$", re.IGNORECASE)
 
     while True:
         print("Select irc nick: -\n\n"
@@ -306,13 +306,13 @@ def main():
         elif r_cctwins.match(cmd):
             CCTwins(nick)
         elif r_ccthelp.match(cmd):
-            pass # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            print("-- help url goes here --")
         # admin only cmds
-        elif r_cctreset.match(cmd):
+        elif r_cctreset.match(cmd) and r_ADMIN.match(nick):
             CCTreset()
-        elif r_cctroll.match(cmd):
+        elif r_cctroll.match(cmd) and r_ADMIN.match(nick):
             CCTroll()
-        elif r_cctdummy.match(cmd):
+        elif r_cctdummy.match(cmd) and r_ADMIN.match(nick):
             CCTdummy(dummies)
         else:
             print("-- no match")
