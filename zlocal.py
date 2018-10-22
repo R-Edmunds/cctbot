@@ -185,11 +185,13 @@ def CCTdummy(dummies):
 def CCTroll():
     c = CCTcount(1)
     if c > 4:
-        e = session.query(Twitch.name)\
+        e = session.query(Twitch.name, Twitch.id)\
                 .filter(Entrants.twitch_id==Twitch.id).all()
         session.close()
         winner = random.choice(e)
         CCTremove(winner[0], 1)
+        win_record = Wins(twitch_id=winner[1])
+        session.add(win_record)
         session.commit()
         print("-- WINNER:  {} - EVE chars:  {}".format( winner[0].title(), CCTgetchars(winner[0], 1).title() ))
     else:
