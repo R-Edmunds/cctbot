@@ -25,27 +25,27 @@ dummies = [
         ["irma seeley", ["e-seeley", "e-seele2", "e-seeley3"]],
         ["kari comstock", ["e-comstock", "e-comstoc2", "e-comstock3"]],
         ["maye petree", ["e-petree1", "e-petree2", "e-petree13"]],
-        # ["jone mccrady", ["e-mccrady", "e-mccrad2", "e-mccrady3"]],
-        # ["corrinne eastin", ["e-eastin", "e-easti2",]],
-        # ["roseann pruneda", ["e-pruneda", "e-pruned2",]],
-        # ["peg carithers", ["e-carithers", "e-carither2", "e-carithers3"]],
-        # ["yang castillo", ["e-castillo", "e-castill2", "e-castillo3"]],
-        # ["margene hobgood", ["e-hobgood", "e-hobgoo2", "e-hobgood3"]],
-        # ["ruben folse", ["e-folse", "e-fols2", "e-folse3"]],
-        # ["merle holtsclaw", ["e-holtsclaw", "e-holtscla2", "e-holtsclaw3"]],
-        # ["ginger hans", ["e-hans", "e-han2", "e-hans3"]],
-        # ["cyril haubert", ["e-haubert", "e-hauber2",]],
-        # ["morris jelks", ["e-jelks", "e-jelk2",]],
-        # ["felicita donlon", ["e-donlon", "e-donlo2", "e-donlon3"]],
-        # ["lauryn darner", ["e-darner", "e-darne2",]],
-        # ["kortney rawles", ["e-rawles", "e-rawle2", "e-rawles3"]],
-        # ["antoine metzger", ["e-metzger",]],
-        # ["birgit fannin", ["e-fannin", "e-fanni2", "e-fannin3"]],
-        # ["ezequiel callison", ["e-callison", "e-calliso2", "e-callison3"]],
-        # ["carissa flaugher", ["e-flaugher",]],
-        # ["nettie castille", ["e-castille", "e-castill2", "e-castille3"]],
-        # ["natisha deforge", ["e-deforge", "e-deforg2", "e-deforge3"]],
-        # ["antonina defoor", ["e-defoor", "e-defoo2", "e-defoor3"]],
+        ["jone mccrady", ["e-mccrady", "e-mccrad2", "e-mccrady3"]],
+        ["corrinne eastin", ["e-eastin", "e-easti2",]],
+        ["roseann pruneda", ["e-pruneda", "e-pruned2",]],
+        ["peg carithers", ["e-carithers", "e-carither2", "e-carithers3"]],
+        ["yang castillo", ["e-castillo", "e-castill2", "e-castillo3"]],
+        ["margene hobgood", ["e-hobgood", "e-hobgoo2", "e-hobgood3"]],
+        ["ruben folse", ["e-folse", "e-fols2", "e-folse3"]],
+        ["merle holtsclaw", ["e-holtsclaw", "e-holtscla2", "e-holtsclaw3"]],
+        ["ginger hans", ["e-hans", "e-han2", "e-hans3"]],
+        ["cyril haubert", ["e-haubert", "e-hauber2",]],
+        ["morris jelks", ["e-jelks", "e-jelk2",]],
+        ["felicita donlon", ["e-donlon", "e-donlo2", "e-donlon3"]],
+        ["lauryn darner", ["e-darner", "e-darne2",]],
+        ["kortney rawles", ["e-rawles", "e-rawle2", "e-rawles3"]],
+        ["antoine metzger", ["e-metzger",]],
+        ["birgit fannin", ["e-fannin", "e-fanni2", "e-fannin3"]],
+        ["ezequiel callison", ["e-callison", "e-calliso2", "e-callison3"]],
+        ["carissa flaugher", ["e-flaugher",]],
+        ["nettie castille", ["e-castille", "e-castill2", "e-castille3"]],
+        ["natisha deforge", ["e-deforge", "e-deforg2", "e-deforge3"]],
+        ["antonina defoor", ["e-defoor", "e-defoo2", "e-defoor3"]],
     ]
 
 
@@ -56,6 +56,7 @@ def connectDB():
 
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
+    return
 
 def CCTu(nick, char):
     twitch = session.query(Twitch).filter(Twitch.name==nick).scalar()
@@ -156,6 +157,32 @@ def CCTgetchars(nick, silent=None):
     else:
         if silent == None:
             print("-- You have no associated EVE character(s).")
+        return
+
+def CCTwins(nick, silent=None):
+    # temp, add win record
+    temp = session.query(Twitch.id).filter(Twitch.name==nick).one()
+    # print(temp)
+    add = Wins(twitch_id=temp[0])
+    session.add(add)
+    session.commit()
+
+    # output date, time of last win, win count
+    count = session.query(Wins).join(Twitch)\
+                .filter(Twitch.name==nick).count()
+    if count > 0:
+        qry = session.query(Wins).join(Twitch)\
+                    .filter(Twitch.name==nick)\
+                    .order_by( Wins.date.desc() ).first()
+
+        last_win = qry.date
+        last_win = last_win.strftime("%a, %d %b %Y, %H:%M, (EVE-Time)")
+        # print(last_win)
+        if silent == None:
+            print("-- Last CCT win:  {}  |  Total wins:  {}".format( last_win, count ))
+    else:
+        if silent == None:
+            print("-- You have no wins. Keep playing and good luck!")
 
 def CCTdelete(nick):
     scalar = session.query(Twitch).filter(Twitch.name==nick).scalar()
@@ -209,6 +236,7 @@ def main():
     r_cctdummy = re.compile("^!cctdummy$", re.IGNORECASE)
     r_cctchar = re.compile("^!cctchar$", re.IGNORECASE)
     r_cctchars = re.compile("^!cctchars$", re.IGNORECASE)
+    r_cctwins = re.compile("^!cctwins$", re.IGNORECASE)
     r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
     r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
     ADMIN = re.compile("^admin$", re.IGNORECASE)
@@ -261,6 +289,8 @@ def main():
             CCTgetchars(nick)
         elif r_cctdelete.match(cmd):
             CCTdelete(nick)
+        elif r_cctwins.match(cmd):
+            CCTwins(nick)
         elif r_ccthelp.match(cmd):
             pass # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         # admin only cmds
