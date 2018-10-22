@@ -251,54 +251,52 @@ def CCTroll():
         print("-- There are {} entrants. Get 5 or more before rolling. EVE am ded?!".format(c))
 
 
-def main():
-    # define cmds in regex
-    r_cctu = re.compile("^!cct\s...", re.IGNORECASE)
-    r_cct = re.compile("^!cct$", re.IGNORECASE)
-    r_cctreset = re.compile("^!cctreset$", re.IGNORECASE)
-    r_cctroll = re.compile("^!cctroll$", re.IGNORECASE)
-    r_cctcount = re.compile("^!cctcount$", re.IGNORECASE)
-    r_cctremove = re.compile("^!cctremove$", re.IGNORECASE)
-    r_cctdummy = re.compile("^!cctdummy$", re.IGNORECASE)
-    r_cctchar = re.compile("^!cctchar$", re.IGNORECASE)
-    r_cctchars = re.compile("^!cctchars$", re.IGNORECASE)
-    r_cctwins = re.compile("^!cctwins$", re.IGNORECASE)
-    r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
-    r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
-    r_ADMIN = re.compile("^anarchicuk$", re.IGNORECASE)
+# main() in prototype
+class cctbot(znc.Module):
+    module_types = [znc.CModInfo.UserModule]
+    description = "Zarvox Toral's cctbot - by Robin Edmunds 2018"
 
-    while True:
-        print("Select irc nick: -\n\n"
-            + "  1. admin\n"
-            + "  2. fred\n"
-            + "  3. geoff\n"
-            + "  4. anarchicuk\n\n"
-        )
-        # slcn = "2"
-        slcn = input("Selection:  ")
+    def OnChanMsg(self, nick, channel, message):
+        # define cmds in regex
+        r_cctu = re.compile("^!cct\s...", re.IGNORECASE)
+        r_cct = re.compile("^!cct$", re.IGNORECASE)
+        r_cctreset = re.compile("^!cctreset$", re.IGNORECASE)
+        r_cctroll = re.compile("^!cctroll$", re.IGNORECASE)
+        r_cctcount = re.compile("^!cctcount$", re.IGNORECASE)
+        r_cctremove = re.compile("^!cctremove$", re.IGNORECASE)
+        r_cctdummy = re.compile("^!cctdummy$", re.IGNORECASE)
+        r_cctchar = re.compile("^!cctchar$", re.IGNORECASE)
+        r_cctchars = re.compile("^!cctchars$", re.IGNORECASE)
+        r_cctwins = re.compile("^!cctwins$", re.IGNORECASE)
+        r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
+        r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
+        r_ADMIN = re.compile("^anarchicuk$", re.IGNORECASE)
 
-        if slcn == "1":
-            nick = "admin"
-            break
-        elif slcn == "2":
-            nick = "fred"
-            break
-        elif slcn == "3":
-            nick = "geoff"
-            break
-        elif slcn == "4":
-            nick = "anarchicuk"
-            break
-        os.system('cls')  # on windows
-    os.system('cls')  # on windows
+        chan = channel.GetName()
+        nick = nick.GetNick()
+        nick = nick.lower()
+        msg = message.s
 
-    while True:
-        msg = input("{}:  ".format(nick)).lower()
-
+        msg = msg.lower()
         msg_list = msg.split(" ")
         cmd = msg_list[0]
         msg_list.remove(msg_list[0])
         char = " ".join(msg_list)
+
+        # msg_list = msg.split(" ")
+        # cmd = msg_list[0]
+        # msg_list.remove(msg_list[0])
+        # char = " ".join(msg_list)
+
+        access_denied = [
+            "Facial scan failed to detect features of malnourished goat",
+            "Failed to detect elite Q-clicking skills",
+            "Green killboard detected",
+            "MASB not positioned on edge of rack",
+            "Light missile condor detected",
+        ]
+
+
 
         connectDB()
         session.execute("PRAGMA foreign_keys=ON")
@@ -330,7 +328,4 @@ def main():
             print("-- no match")
         session.close()
 
-
-
-if __name__ == '__main__':
-    main()
+        return znc.CONTINUE
