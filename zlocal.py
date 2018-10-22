@@ -59,6 +59,7 @@ def connectDB():
     return
 
 def CCTu(nick, char):
+    # !cct EVE CHAR
     twitch = session.query(Twitch).filter(Twitch.name==nick).scalar()
     if twitch == None:
         # user does not exist, add all
@@ -99,9 +100,10 @@ def CCTu(nick, char):
     return
 
 def CCT(nick):
+    # !cct - add existing twitch user to entrants table
     twitch = session.query(Twitch).filter(Twitch.name==nick).scalar()
     if twitch == None:
-        print("-- You don't have an EVE character associated with you twitch name. Use '!cct EVE CHAR' to enter.")
+        print("-- You don't have an EVE character associated with you twitch name. Use '!cct EVE CHAR' to enter CCT.")
     else:
         if twitch.entrants:
             print("-- You are already entered. Good luck!")
@@ -113,6 +115,7 @@ def CCT(nick):
     return
 
 def CCTreset():
+    # !cctreset (admin only) - empty Entrants table
     qry = session.query(Entrants).count()
     if qry > 0:
         session.query(Entrants).delete()
@@ -123,12 +126,14 @@ def CCTreset():
     return
 
 def CCTcount(silent=None):
+    # !cctcount - return sum of all entrants
     count = session.query(Entrants).count()
     if silent == None:
         print("-- There are currently {} CCT entrants.".format(count))
     return count
 
 def CCTremove(nick, silent=None):
+    # !cctremove - remove user from entrants
     twitch = session.query(Twitch)\
                 .filter(Twitch.name==nick).scalar()
     c = session.query(Entrants).filter(Entrants.twitch_id==twitch.id).count()
@@ -143,6 +148,7 @@ def CCTremove(nick, silent=None):
     return
 
 def CCTgetchars(nick, silent=None):
+    # !cctchar(s) - return user's eve chars
     c = session.query(Eve.id).join(Twitch).filter(Twitch.name==nick).count()
     if c > 0:
         qry = session.query(Eve.char).join(Twitch)\
@@ -160,22 +166,24 @@ def CCTgetchars(nick, silent=None):
         return
 
 def CCTwins(nick, silent=None):
-    # # temp, add win record
+    # # temp, add win record for testing
     # temp = session.query(Twitch.id).filter(Twitch.name==nick).one()
     # # print(temp)
     # add = Wins(twitch_id=temp[0])
     # session.add(add)
     # session.commit()
 
-    # output date, time of last win, win count
+    # !cctwins - return datetime of last win, win count
     count = session.query(Wins).join(Twitch)\
                 .filter(Twitch.name==nick).count()
     if count > 0:
+        # get last win row
         qry = session.query(Wins).join(Twitch)\
                     .filter(Twitch.name==nick)\
                     .order_by( Wins.date.desc() ).first()
 
         last_win = qry.date
+        # format date
         last_win = last_win.strftime("%a, %d %b %Y, %H:%M, (EVE-Time)")
         dict = {
             "count": count,
@@ -192,6 +200,7 @@ def CCTwins(nick, silent=None):
         return
 
 def CCTdelete(nick):
+    # !cctdelete - remove ALL records for user
     scalar = session.query(Twitch).filter(Twitch.name==nick).scalar()
     if scalar:
         session.delete(scalar)
@@ -202,6 +211,7 @@ def CCTdelete(nick):
     return
 
 def CCTdummy(dummies):
+    # !cctdummy - add dummy records to db, remove in production
     for row in dummies:
         add = Twitch(name=row[0])
         list = []
@@ -217,6 +227,7 @@ def CCTdummy(dummies):
     return
 
 def CCTroll():
+    # !cctroll - select winner, remove from entrants, record win, display win history
     c = CCTcount(1)
     if c > 4:
         e = session.query(Twitch.name, Twitch.id)\
