@@ -56,6 +56,12 @@ class cctbot(znc.Module):
     def OnChanMsg(self, nick, channel, message):
 
         # >>>>>>>>>>>> funcs start <<<<<<<<<<<<
+
+        def Accessdenied(nick):
+            self.PutIRC("PRIVMSG {} :@{}  ACCESS DENIED:  {}"
+                .format( chan, nick, random.choice(access_denied) ))
+            return
+
         def connectDB():
             global session
             engine = create_engine('sqlite:////srv/znc/.znc/cctbot/cctdb.sqlite3')
@@ -284,7 +290,7 @@ class cctbot(znc.Module):
         r_cctwins = re.compile("^!cctwins$", re.IGNORECASE)
         r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
         r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
-        r_ADMIN = re.compile("^anarchicuk$", re.IGNORECASE)
+        r_ADMIN = re.compile("^LARD$", re.IGNORECASE)
 
         chan = channel.GetName()
         nick = nick.GetNick()
@@ -332,12 +338,21 @@ class cctbot(znc.Module):
         elif r_ccthelp.match(cmd):
             self.PutIRC("PRIVMSG {} :@{} help url goes here --".format(chan, nick))
         # admin only cmds
-        elif r_cctreset.match(cmd) and r_ADMIN.match(nick):
-            CCTreset()
-        elif r_cctroll.match(cmd) and r_ADMIN.match(nick):
-            CCTroll()
-        elif r_cctdummy.match(cmd) and r_ADMIN.match(nick):
-            CCTdummy(dummies)
+        elif r_cctreset.match(cmd):
+            if r_ADMIN.match(nick):
+                CCTreset()
+            else:
+                Accessdenied(nick)
+        elif r_cctroll.match(cmd):
+            if r_ADMIN.match(nick):
+                CCTroll()
+            else:
+                Accessdenied(nick)
+        elif r_cctdummy.match(cmd):
+            if r_ADMIN.match(nick):
+                CCTdummy(dummies)
+            else:
+                Accessdenied(nick)
         else:
             self.PutIRC("PRIVMSG {} :@{} no match".format(chan, nick))
         session.close()
