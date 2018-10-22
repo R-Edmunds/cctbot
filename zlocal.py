@@ -121,24 +121,27 @@ def CCTreset():
         print("-- Entrant list already empty.")
     return
 
-def CCTcount():
+def CCTcount(silent=None):
     count = session.query(Entrants).count()
-    print("-- There are currently {} CCT entrants.".format(count))
-    return
+    if silent == None:
+        print("-- There are currently {} CCT entrants.".format(count))
+    return count
 
-def CCTremove(nick):
+def CCTremove(nick, silent=None):
     twitch = session.query(Twitch)\
                 .filter(Twitch.name==nick).scalar()
     c = session.query(Entrants).filter(Entrants.twitch_id==twitch.id).count()
     if c > 0:
         session.query(Entrants).filter(Entrants.twitch_id==twitch.id).delete()
         session.commit()
-        print("-- You have now been removed from the CCT list.")
+        if silent == None:
+            print("-- You have now been removed from the CCT list.")
     else:
-        print("-- You were not on the CCT list.")
+        if silent == None:
+            print("-- You were not on the CCT list.")
     return
 
-def CCTgetchars(nick):
+def CCTgetchars(nick, silent=None):
     c = session.query(Eve.id).join(Twitch).filter(Twitch.name==nick).count()
     if c > 0:
         qry = session.query(Eve.char).join(Twitch)\
@@ -147,10 +150,12 @@ def CCTgetchars(nick):
         for row in qry:
             list.append(row[0])
         string = ", ".join(list)
-        print("-- Your associated EVE character(s):  {}".format( string.title() ))
+        if silent == None:
+            print("-- Your associated EVE character(s):  {}".format( string.title() ))
         return string
     else:
-        print("-- You have no associated EVE character(s).")
+        if silent == None:
+            print("-- You have no associated EVE character(s).")
 
 def CCTdelete(nick):
     scalar = session.query(Twitch).filter(Twitch.name==nick).scalar()
@@ -178,16 +183,15 @@ def CCTdummy(dummies):
     return
 
 def CCTroll():
-    c = CCTcount()
+    c = CCTcount(1)
     if c > 4:
         e = session.query(Twitch.name)\
                 .filter(Entrants.twitch_id==Twitch.id).all()
         session.close()
         winner = random.choice(e)
-        twitch = session.query(Twitch.id).filter(Twitch.name==winner[0]).one()
-        session.query(Entrants).filter(Entrants.twitch_id==twitch.id).delete()
+        CCTremove(winner[0], 1)
         session.commit()
-        print("-- WINNER:  {} - EVE chars:  {}".format( winner[0].title(), CCTgetchars(winner[0]).title() ))
+        print("-- WINNER:  {} - EVE chars:  {}".format( winner[0].title(), CCTgetchars(winner[0], 1).title() ))
     else:
         print("-- There are {} entrants. Get 5 or more before rolling. EVE am ded?!".format(c))
 
