@@ -160,12 +160,12 @@ def CCTgetchars(nick, silent=None):
         return
 
 def CCTwins(nick, silent=None):
-    # temp, add win record
-    temp = session.query(Twitch.id).filter(Twitch.name==nick).one()
-    # print(temp)
-    add = Wins(twitch_id=temp[0])
-    session.add(add)
-    session.commit()
+    # # temp, add win record
+    # temp = session.query(Twitch.id).filter(Twitch.name==nick).one()
+    # # print(temp)
+    # add = Wins(twitch_id=temp[0])
+    # session.add(add)
+    # session.commit()
 
     # output date, time of last win, win count
     count = session.query(Wins).join(Twitch)\
@@ -177,12 +177,19 @@ def CCTwins(nick, silent=None):
 
         last_win = qry.date
         last_win = last_win.strftime("%a, %d %b %Y, %H:%M, (EVE-Time)")
-        # print(last_win)
+        dict = {
+            "count": count,
+            "date": last_win,
+        }
         if silent == None:
             print("-- Last CCT win:  {}  |  Total wins:  {}".format( last_win, count ))
+            return
+        else:
+            return dict
     else:
         if silent == None:
             print("-- You have no wins. Keep playing and good luck!")
+        return
 
 def CCTdelete(nick):
     scalar = session.query(Twitch).filter(Twitch.name==nick).scalar()
@@ -217,10 +224,17 @@ def CCTroll():
         session.close()
         winner = random.choice(e)
         CCTremove(winner[0], 1)
+        win_hist = CCTwins(winner[0], 1)  # get win history
         win_record = Wins(twitch_id=winner[1])
         session.add(win_record)
         session.commit()
-        print("-- WINNER:  {} - EVE chars:  {}".format( winner[0].title(), CCTgetchars(winner[0], 1).title() ))
+        if win_hist:
+            print("-- WINNER:  {} - EVE char(s):  {} - Total wins: {} - Last win:  {}"\
+                    .format( winner[0].title(), CCTgetchars(winner[0], 1).title(),
+                     win_hist['count'], win_hist['date']))
+        else:
+            print("-- WINNER:  {} - EVE char(s):  {} - FIRST WIN!"\
+            .format( winner[0].title(), CCTgetchars( winner[0], 1).title() ))
     else:
         print("-- There are {} entrants. Get 5 or more before rolling. EVE am ded?!".format(c))
 
