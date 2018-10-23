@@ -232,6 +232,7 @@ class cctbot(znc.Module):
                     list.append(x)
                 add.eve = list
                 add.entrants = Entrants()
+                # randomise win record entries between 0-4
                 r_int = int( random.choice(range(0,4)) )
                 if r_int > 0:
                     while r_int > 0:
@@ -360,3 +361,5 @@ class cctbot(znc.Module):
         session.close()
 
         return znc.CONTINUE
+
+# END END END END END END END END END END END END END END
