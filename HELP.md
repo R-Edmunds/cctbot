@@ -15,6 +15,6 @@ Command | Action
 Command | Action
 --- | ---
 !cctreset | Empty the current entrant list in preparation for new CCT event.
-!cctroll | Roll the space dice! Outputs winner name, EVE characters and win history. Winners are automatically removed from the entrant list.
+!cctroll | Roll the space dice! Outputs winner name, EVE characters and win history. Winners are automatically removed from the entrant list. :game_die:
 
-Robin Edmunds 2018
+###### &copy; 2018 Robin Edmunds
