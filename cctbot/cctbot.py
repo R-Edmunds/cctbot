@@ -9,9 +9,9 @@ from sqlalchemy.engine import Engine
 import random
 import re
 import sys
+import znc
 sys.path.append('/srv/znc/.znc/cctbot')
 from cctbotdb import Base, Twitch, Eve, Entrants, Wins
-import znc
 
 
 dummies = [
