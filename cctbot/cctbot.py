@@ -18,7 +18,6 @@ dummies = [
         ["lorene sarvis", ["e-sarvis", "e-sarvi2", "e-sarvis3"]],
         ["kristel giancola", ["e-giancola", "e-giancol2", "e-giancola3"]],
         ["loyd crick", ["e-crick", "e-cric2", "e-crick3"]],
-        ["anarchicuk", ["sukyakka", "natalia blackwater", "yuzzette freeman"]],
         ["temeka keagle", ["e-keagle", "e-keagl2", "e-keagle3"]],
         ["helaine gaona", ["e-gaona", "e-gaon2", "e-gaona3"]],
         ["peggy dengler", ["e-dengler", "e-dengle2", "e-dengler3"]],
@@ -116,7 +115,7 @@ class cctbot(znc.Module):
             # !cct - add existing twitch user to entrants table
             twitch = session.query(Twitch).filter(Twitch.name==nick).scalar()
             if twitch == None:
-                self.PutIRC("PRIVMSG {} :@{}  You don't have an EVE character associated with you twitch name. Use '!cct EVE CHAR' to enter CCT.".format(chan, nick))
+                self.PutIRC("PRIVMSG {} :@{}  You don't have an EVE character associated with your twitch name. Use '!cct EVE CHAR' to enter CCT.".format(chan, nick))
             else:
                 if twitch.entrants:
                     self.PutIRC("PRIVMSG {} :@{}  You are already entered. Good luck!".format(chan, nick))
@@ -253,20 +252,18 @@ class cctbot(znc.Module):
                 session.add(win_record)
                 session.commit()
                 if win_hist:
-                    self.PutIRC("PRIVMSG {} :>>> WINNER >>>  {}  <<< WINNER <<<  |  EVE char(s):  {}  |  Total wins: {}  |  Last win:  {}"\
+                    self.PutIRC("PRIVMSG {} :WINNER >>> ** {} **  |  EVE char(s):  {}  |  Total wins: {}  |  Last win:  {}"\
                         .format(
                             chan,
-                            nick,
                             winner[0].title(),
                             CCTgetchars(winner[0], 1).title(),
                             win_hist['count'],
                             win_hist['date']
                         ))
                 else:
-                    self.PutIRC("PRIVMSG {} :>>> WINNER >>>  {}  <<< WINNER <<<  |  EVE char(s):  {}  |  FIRST WIN!"\
+                    self.PutIRC("PRIVMSG {} :WINNER >>> ** {} **  |  EVE char(s):  {}  |  FIRST WIN!"\
                     .format(
                         chan,
-                        nick,
                         winner[0].title(),
                         CCTgetchars( winner[0], 1).title()
                     ))
@@ -290,7 +287,7 @@ class cctbot(znc.Module):
         r_cctwins = re.compile("^!cctwins$", re.IGNORECASE)
         r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
         r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
-        r_ADMIN = re.compile("^LARD$", re.IGNORECASE)
+        r_ADMIN = re.compile("^anarchicuk$", re.IGNORECASE)
 
         chan = channel.GetName()
         nick = nick.GetNick()
@@ -314,6 +311,7 @@ class cctbot(znc.Module):
             "Green killboard detected",
             "MASB not positioned on edge of rack",
             "Light missile condor detected",
+            "Man balls remain to be found",
         ]
 
 
