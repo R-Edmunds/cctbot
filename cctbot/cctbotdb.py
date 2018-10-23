@@ -30,45 +30,51 @@ class Twitch(Base):
 class Eve(Base):
     __tablename__ = 'eve'
     id = Column(Integer, primary_key=True)
-    twitch_id = Column(Integer, ForeignKey('twitch.id', ondelete='CASCADE', onupdate='CASCADE'))
+    twitch_id = Column(Integer, ForeignKey(
+        'twitch.id', ondelete='CASCADE', onupdate='CASCADE'))
     char = Column(String(70), nullable=False)
-    # Use cascade='delete,all' to propagate the deletion of a Twitch row to children
+    # brackref cascade don't appear to work despite being pulled directly from
+    # sqlalchemy docs. Foreign key CASCADE params are what cause cascade.
     twitch = relationship(
         Twitch,
         backref=backref('eve',
-                         uselist=True,
-                         cascade_backrefs=True,
-                         lazy='joined',
-                         cascade='all,delete-orphan'))
+                        uselist=True,
+                        cascade_backrefs=True,
+                        lazy='joined',
+                        cascade='all,delete-orphan'))
 
 
 class Entrants(Base):
     __tablename__ = 'entrants'
     id = Column(Integer, primary_key=True)
-    twitch_id = Column(Integer, ForeignKey('twitch.id', ondelete='CASCADE', onupdate='CASCADE'))
-    # Use cascade='delete,all' to propagate the deletion of a Twitch row to children
+    twitch_id = Column(Integer, ForeignKey(
+        'twitch.id', ondelete='CASCADE', onupdate='CASCADE'))
+    # brackref cascade don't appear to work despite being pulled directly from
+    # sqlalchemy docs. Foreign key CASCADE params are what cause cascade.
     twitch = relationship(
         Twitch,
         backref=backref('entrants',
-                         uselist=False,
-                         cascade_backrefs=True,
-                         lazy='joined',
-                         cascade='all,delete-orphan'))
+                        uselist=False,
+                        cascade_backrefs=True,
+                        lazy='joined',
+                        cascade='all,delete-orphan'))
 
 
 class Wins(Base):
     __tablename__ = 'wins'
     id = Column(Integer, primary_key=True)
-    twitch_id = Column(Integer, ForeignKey('twitch.id', ondelete='CASCADE', onupdate='CASCADE'))
-    # Use cascade='delete,all' to propagate the deletion of a Twitch row to children
+    twitch_id = Column(Integer, ForeignKey(
+        'twitch.id', ondelete='CASCADE', onupdate='CASCADE'))
+    # brackref cascade don't appear to work despite being pulled directly from
+    # sqlalchemy docs. Foreign key CASCADE params are what cause cascade.
     date = Column(DateTime, default=func.now(), nullable=False)
     twitch = relationship(
         Twitch,
         backref=backref('wins',
-                         uselist=True,
-                         cascade_backrefs=True,
-                         lazy='joined',
-                         cascade='all,delete-orphan'))
+                        uselist=True,
+                        cascade_backrefs=True,
+                        lazy='joined',
+                        cascade='all,delete-orphan'))
 
 
 engine = create_engine('sqlite:////srv/znc/.znc/cctbot/cctdb.sqlite3')
