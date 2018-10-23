@@ -39,23 +39,23 @@ dummies = [
         ["kari comstock", ["e-comstock", "e-comstoc2", "e-comstock3"]],
         ["maye petree", ["e-petree1", "e-petree2", "e-petree13"]],
         ["jone mccrady", ["e-mccrady", "e-mccrad2", "e-mccrady3"]],
-        ["corrinne eastin", ["e-eastin", "e-easti2",]],
-        ["roseann pruneda", ["e-pruneda", "e-pruned2",]],
+        ["corrinne eastin", ["e-eastin", "e-easti2"]],
+        ["roseann pruneda", ["e-pruneda", "e-pruned2"]],
         ["peg carithers", ["e-carithers", "e-carither2", "e-carithers3"]],
         ["yang castillo", ["e-castillo", "e-castill2", "e-castillo3"]],
         ["margene hobgood", ["e-hobgood", "e-hobgoo2", "e-hobgood3"]],
         ["ruben folse", ["e-folse", "e-fols2", "e-folse3"]],
         ["merle holtsclaw", ["e-holtsclaw", "e-holtscla2", "e-holtsclaw3"]],
         ["ginger hans", ["e-hans", "e-han2", "e-hans3"]],
-        ["cyril haubert", ["e-haubert", "e-hauber2",]],
-        ["morris jelks", ["e-jelks", "e-jelk2",]],
+        ["cyril haubert", ["e-haubert", "e-hauber2"]],
+        ["morris jelks", ["e-jelks", "e-jelk2"]],
         ["felicita donlon", ["e-donlon", "e-donlo2", "e-donlon3"]],
-        ["lauryn darner", ["e-darner", "e-darne2",]],
+        ["lauryn darner", ["e-darner", "e-darne2"]],
         ["kortney rawles", ["e-rawles", "e-rawle2", "e-rawles3"]],
-        ["antoine metzger", ["e-metzger",]],
+        ["antoine metzger", ["e-metzger"]],
         ["birgit fannin", ["e-fannin", "e-fanni2", "e-fannin3"]],
         ["ezequiel callison", ["e-callison", "e-calliso2", "e-callison3"]],
-        ["carissa flaugher", ["e-flaugher",]],
+        ["carissa flaugher", ["e-flaugher"]],
         ["nettie castille", ["e-castille", "e-castill2", "e-castille3"]],
         ["natisha deforge", ["e-deforge", "e-deforg2", "e-deforge3"]],
         ["antonina defoor", ["e-defoor", "e-defoo2", "e-defoor3"]],
@@ -71,35 +71,38 @@ def connectDB():
     session = DBSession()
     return
 
+
 def CCTu(nick, char):
     # !cct EVE CHAR
-    twitch = session.query(Twitch).filter(Twitch.name==nick).scalar()
-    if twitch == None:
+    twitch = session.query(Twitch).filter(Twitch.name == nick).scalar()
+    if twitch is None:
         # user does not exist, add all
         add = Twitch(name=nick)
         add.eve.append(Eve(char=char))
         add.entrants = Entrants()
         session.add(add)
-        print("-- You are now on the CCT list, with a new EVE character. Good luck!")
+        print("-- You are now on the CCT list, with a new EVE character. Good\
+            luck!")
     else:
         # user exists
         entered = session.query(Entrants).join(Twitch)\
-                    .filter(Twitch.name==nick).scalar()
+                    .filter(Twitch.name == nick).scalar()
         char_exists = session.query(Eve).join(Twitch)\
-                    .filter(Eve.char==char)\
-                    .filter(Twitch.name==nick).scalar()
-        if entered == None and char_exists == None:
+            .filter(Eve.char == char)\
+            .filter(Twitch.name == nick).scalar()
+        if entered is None and char_exists is None:
             # user exists, not entered, char doesnt exist
             twitch.eve.append(Eve(char=char))
             twitch.entrants = Entrants()
             session.add(twitch)
-            print("-- You are now on the CCT list, with a new EVE character. Good luck!")
-        elif entered == None and char_exists:
+            print("-- You are now on the CCT list, with a new EVE character.\
+                Good luck!")
+        elif entered is None and char_exists:
             # all exist but not entered
             twitch.entrants = Entrants()
             session.add(twitch)
             print("-- You are now on the CCT list. Good luck!")
-        elif entered and char_exists == None:
+        elif entered and char_exists is None:
             # entered but char doesnt exist
             twitch.eve.append(Eve(char=char))
             session.add(twitch)
@@ -112,11 +115,13 @@ def CCTu(nick, char):
     session.commit()
     return
 
+
 def CCT(nick):
     # !cct - add existing twitch user to entrants table
-    twitch = session.query(Twitch).filter(Twitch.name==nick).scalar()
-    if twitch == None:
-        print("-- You don't have an EVE character associated with you twitch name. Use '!cct EVE CHAR' to enter CCT.")
+    twitch = session.query(Twitch).filter(Twitch.name == nick).scalar()
+    if twitch is None:
+        print("-- You don't have an EVE character associated with you twitch\
+            name. Use '!cct EVE CHAR' to enter CCT.")
     else:
         if twitch.entrants:
             print("-- You are already entered. Good luck!")
@@ -126,6 +131,7 @@ def CCT(nick):
             session.commit()
             print("-- You are now on the CCT list. Good luck!")
     return
+
 
 def CCTreset():
     # !cctreset (admin only) - empty Entrants table
@@ -138,45 +144,51 @@ def CCTreset():
         print("-- Entrant list already empty.")
     return
 
+
 def CCTcount(silent=None):
     # !cctcount - return sum of all entrants
     count = session.query(Entrants).count()
-    if silent == None:
+    if silent is None:
         print("-- There are currently {} CCT entrants.".format(count))
     return count
+
 
 def CCTremove(nick, silent=None):
     # !cctremove - remove user from entrants
     twitch = session.query(Twitch)\
-                .filter(Twitch.name==nick).scalar()
-    c = session.query(Entrants).filter(Entrants.twitch_id==twitch.id).count()
+                .filter(Twitch.name == nick).scalar()
+    c = session.query(Entrants).filter(Entrants.twitch_id == twitch.id).count()
     if c > 0:
-        session.query(Entrants).filter(Entrants.twitch_id==twitch.id).delete()
+        session.query(Entrants)\
+            .filter(Entrants.twitch_id == twitch.id).delete()
         session.commit()
-        if silent == None:
+        if silent is None:
             print("-- You have now been removed from the CCT list.")
     else:
-        if silent == None:
+        if silent is None:
             print("-- You were not on the CCT list.")
     return
 
+
 def CCTgetchars(nick, silent=None):
     # !cctchar(s) - return user's eve chars
-    c = session.query(Eve.id).join(Twitch).filter(Twitch.name==nick).count()
+    c = session.query(Eve.id).join(Twitch).filter(Twitch.name == nick).count()
     if c > 0:
         qry = session.query(Eve.char).join(Twitch)\
-                .filter(Twitch.name==nick).all()
+                .filter(Twitch.name == nick).all()
         list = []
         for row in qry:
             list.append(row[0])
         string = ", ".join(list)
-        if silent == None:
-            print("-- Your associated EVE character(s):  {}".format( string.title() ))
+        if silent is None:
+            print("-- Your associated EVE character(s):  {}".format(
+                string.title()))
         return string
     else:
-        if silent == None:
+        if silent is None:
             print("-- You have no associated EVE character(s).")
         return
+
 
 def CCTwins(nick, silent=None):
     # # temp, add win record for testing
@@ -188,12 +200,12 @@ def CCTwins(nick, silent=None):
 
     # !cctwins - return datetime of last win, win count
     count = session.query(Wins).join(Twitch)\
-                .filter(Twitch.name==nick).count()
+                .filter(Twitch.name == nick).count()
     if count > 0:
         # get last win row
         qry = session.query(Wins).join(Twitch)\
-                    .filter(Twitch.name==nick)\
-                    .order_by( Wins.date.desc() ).first()
+                    .filter(Twitch.name == nick)\
+                    .order_by(Wins.date.desc()).first()
 
         last_win = qry.date
         # format date
@@ -202,26 +214,30 @@ def CCTwins(nick, silent=None):
             "count": count,
             "date": last_win,
         }
-        if silent == None:
-            print("-- Last CCT win:  {}  |  Total wins:  {}".format( last_win, count ))
+        if silent is None:
+            print("-- Last CCT win:  {}  |  Total wins:  {}".format(
+                last_win, count))
             return
         else:
             return dict
     else:
-        if silent == None:
+        if silent is None:
             print("-- You have no wins. Keep playing and good luck!")
         return
 
+
 def CCTdelete(nick):
     # !cctdelete - remove ALL records for user
-    scalar = session.query(Twitch).filter(Twitch.name==nick).scalar()
+    scalar = session.query(Twitch).filter(Twitch.name == nick).scalar()
     if scalar:
         session.delete(scalar)
         session.commit()
-        print("-- All records associated with your Twitch name have been deleted.")
+        print("-- All records associated with your Twitch name have been\
+            deleted.")
     else:
         print("-- No records found for your Twitch user.")
     return
+
 
 def CCTdummy(dummies):
     # !cctdummy - add dummy records to db, remove in production
@@ -236,15 +252,17 @@ def CCTdummy(dummies):
         add.wins = [Wins()]
         session.add(add)
     session.commit()
-    print("-- {}  dummy entries added".format( len(dummies) ))
+    print("-- {}  dummy entries added".format(len(dummies)))
     return
 
+
 def CCTroll():
-    # !cctroll - select winner, remove from entrants, record win, display win history
+    # !cctroll - select winner, remove from entrants, record win, display
+    # win history
     c = CCTcount(1)
     if c > 4:
         e = session.query(Twitch.name, Twitch.id)\
-                .filter(Entrants.twitch_id==Twitch.id).all()
+                .filter(Entrants.twitch_id == Twitch.id).all()
         session.close()
         winner = random.choice(e)
         CCTremove(winner[0], 1)
@@ -253,14 +271,19 @@ def CCTroll():
         session.add(win_record)
         session.commit()
         if win_hist:
-            print("-- WINNER:  {} - EVE char(s):  {} - Total wins: {} - Last win:  {}"\
-                    .format( winner[0].title(), CCTgetchars(winner[0], 1).title(),
-                     win_hist['count'], win_hist['date']))
+            print("-- WINNER:  {} - EVE char(s):  {} - Total wins: {} - Last\
+                win:  {}" .format(
+                winner[0].title(),
+                CCTgetchars(winner[0], 1).title(),
+                win_hist['count'],
+                win_hist['date']))
         else:
-            print("-- WINNER:  {} - EVE char(s):  {} - FIRST WIN!"\
-            .format( winner[0].title(), CCTgetchars( winner[0], 1).title() ))
+            print("-- WINNER:  {} - EVE char(s):  {} - FIRST WIN!".format(
+                winner[0].title(),
+                CCTgetchars(winner[0], 1).title()))
     else:
-        print("-- There are {} entrants. Get 5 or more before rolling. EVE am ded?!".format(c))
+        print("-- There are {} entrants. Get 5 or more before rolling. EVE am\
+            ded?!".format(c))
 
 
 def main():
@@ -284,8 +307,7 @@ def main():
             + "  1. admin\n"
             + "  2. fred\n"
             + "  3. geoff\n"
-            + "  4. anarchicuk\n\n"
-        )
+            + "  4. anarchicuk\n\n")
         # slcn = "2"
         slcn = input("Selection:  ")
 
@@ -341,7 +363,6 @@ def main():
         else:
             print("-- no match")
         session.close()
-
 
 
 if __name__ == '__main__':
