@@ -232,7 +232,11 @@ class cctbot(znc.Module):
                     list.append(x)
                 add.eve = list
                 add.entrants = Entrants()
-                add.wins = [Wins()]
+                r_int = int( random.choice(range(0,4)) )
+                if r_int > 0:
+                    while r_int > 0:
+                        r_int = r_int -1
+                        add.wins.append( Wins() )
                 session.add(add)
             session.commit()
             self.PutIRC("PRIVMSG {} :@{}  {}  dummy entries added".format(chan, nick,  len(dummies) ))
