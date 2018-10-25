@@ -1,4 +1,8 @@
 ## cctbot Help
+The Community Contract Clustertruck! Zarvox flys your ships/fits out of Jita 4-4!
+
+https://www.twitch.tv/zarvoxtoral
+
 ### User Commands
 Command | Action
 --- | ---

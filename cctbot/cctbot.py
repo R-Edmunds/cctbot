@@ -94,8 +94,8 @@ class cctbot(znc.Module):
                 add.eve.append(Eve(char=char))
                 add.entrants = Entrants()
                 session.add(add)
-                self.PutIRC("PRIVMSG {} :@{}  Added to CCT list with new EVE\
-                    character. Good luck!".format(chan, nick))
+                self.PutIRC("PRIVMSG {} :@{}  Added to CCT list with new EVE \
+                character. Good luck!".format(chan, nick))
             else:
                 # user exists
                 entered = session.query(Entrants).join(Twitch)\
@@ -108,27 +108,27 @@ class cctbot(znc.Module):
                     twitch.eve.append(Eve(char=char))
                     twitch.entrants = Entrants()
                     session.add(twitch)
-                    self.PutIRC("PRIVMSG {} :@{}  Added to CCT list with new\
-                        EVE character. Good luck!".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  Added to CCT list with new \
+                    EVE character. Good luck!".format(chan, nick))
                 elif entered is None and char_exists:
                     # all exist but not entered
                     twitch.entrants = Entrants()
                     session.add(twitch)
-                    self.PutIRC("PRIVMSG {} :@{}  Added to CCT list. Good\
-                        luck!".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  Added to CCT list. Good \
+                    luck!".format(chan, nick))
                 elif entered and char_exists is None:
                     # entered but char doesnt exist
                     twitch.eve.append(Eve(char=char))
                     session.add(twitch)
-                    self.PutIRC("PRIVMSG {} :@{}  New EVE character added.\
-                        Already in CCT list. Good luck!".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  New EVE character added. \
+                    Already in CCT list. Good luck!".format(chan, nick))
                 elif entered and char_exists:
                     # entered and char exists
-                    self.PutIRC("PRIVMSG {} :@{}  Already on CCT list. Good\
-                        luck!".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  Already on CCT list. Good \
+                    luck!".format(chan, nick))
                 else:
-                    self.PutIRC("PRIVMSG {} :@{}  Error:  CCTu() something\
-                        went wrong".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  Error:  CCTu() something \
+                    went wrong".format(chan, nick))
             session.commit()
             return
 
@@ -136,19 +136,19 @@ class cctbot(znc.Module):
             # !cct - add existing twitch user to entrants table
             twitch = session.query(Twitch).filter(Twitch.name == nick).scalar()
             if twitch is None:
-                self.PutIRC("PRIVMSG {} :@{}  You don't have an EVE character\
-                    associated with your twitch name. Use '!cct EVE CHAR' to\
-                    enter CCT.".format(chan, nick))
+                self.PutIRC("PRIVMSG {} :@{}  You don't have an EVE character \
+                associated with your twitch name. Use '!cct EVE CHAR' to \
+                enter CCT.".format(chan, nick))
             else:
                 if twitch.entrants:
-                    self.PutIRC("PRIVMSG {} :@{}  You are already entered.\
-                        Good luck!".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  You are already entered. \
+                    Good luck!".format(chan, nick))
                 else:
                     twitch.entrants = Entrants()
                     session.add(twitch)
                     session.commit()
-                    self.PutIRC("PRIVMSG {} :@{}  Added to CCT list. Good\
-                        luck!".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  Added to CCT list. Good \
+                    luck!".format(chan, nick))
             return
 
         def CCTreset():
@@ -157,8 +157,8 @@ class cctbot(znc.Module):
             if qry > 0:
                 session.query(Entrants).delete()
                 session.commit()
-                self.PutIRC("PRIVMSG {} :@{}  Entrant list reset\
-                    successfully.".format(chan, nick))
+                self.PutIRC("PRIVMSG {} :@{}  Entrant list reset \
+                successfully.".format(chan, nick))
             else:
                 self.PutIRC("PRIVMSG {} :@{}  Entrant list already empty."
                             .format(chan, nick))
@@ -168,8 +168,8 @@ class cctbot(znc.Module):
             # !cctcount - return sum of all entrants
             count = session.query(Entrants).count()
             if silent is None:
-                self.PutIRC("PRIVMSG {} :@{}  There are currently * {} * CCT\
-                    entrants.".format(chan, nick, count))
+                self.PutIRC("PRIVMSG {} :@{}  There are currently * {} * CCT \
+                entrants.".format(chan, nick, count))
             return count
 
         def CCTremove(nick, silent=None):
@@ -183,12 +183,12 @@ class cctbot(znc.Module):
                     .filter(Entrants.twitch_id == twitch.id).delete()
                 session.commit()
                 if silent is None:
-                    self.PutIRC("PRIVMSG {} :@{}  You have now been removed\
-                        from the CCT list.".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  You have now been removed \
+                    from the CCT list.".format(chan, nick))
             else:
                 if silent is None:
-                    self.PutIRC("PRIVMSG {} :@{}  You were not on the CCT\
-                        list.".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  You were not on the CCT \
+                    list.".format(chan, nick))
             return
 
         def CCTgetchars(nick, silent=None):
@@ -203,13 +203,13 @@ class cctbot(znc.Module):
                     list.append(row[0])
                 string = ", ".join(list)
                 if silent is None:
-                    self.PutIRC("PRIVMSG {} :@{}  Your associated EVE\
-                        character(s):  {}".format(chan, nick,  string.title()))
+                    self.PutIRC("PRIVMSG {} :@{}  Your associated EVE \
+                    character(s):  {}".format(chan, nick,  string.title()))
                 return string
             else:
                 if silent is None:
-                    self.PutIRC("PRIVMSG {} :@{}  You have no associated EVE\
-                        character(s).".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  You have no associated EVE \
+                    character(s).".format(chan, nick))
                 return
 
         def CCTwins(nick, silent=None):
@@ -238,14 +238,14 @@ class cctbot(znc.Module):
                 }
                 if silent is None:
                     sself.PutIRC("PRIVMSG {} :@{}  Last CCT win:  {}  |  Total\
-                        wins:  {}".format(chan, nick,  last_win, count))
+                     wins:  {}".format(chan, nick,  last_win, count))
                     return
                 else:
                     return dict
             else:
                 if silent is None:
-                    self.PutIRC("PRIVMSG {} :@{}  You have no wins. Keep\
-                        playing and good luck!".format(chan, nick))
+                    self.PutIRC("PRIVMSG {} :@{}  You have no wins. Keep \
+                    playing and good luck!".format(chan, nick))
                 return
 
         def CCTdelete(nick):
@@ -255,10 +255,10 @@ class cctbot(znc.Module):
                 session.delete(scalar)
                 session.commit()
                 self.PutIRC("PRIVMSG {} :@{}  All records associated with your\
-                    Twitch name have been deleted.".format(chan, nick))
+                 Twitch name have been deleted.".format(chan, nick))
             else:
                 self.PutIRC("PRIVMSG {} :@{}  No records found for your Twitch\
-                    user.".format(chan, nick))
+                 user.".format(chan, nick))
             return
 
         def CCTdummy(dummies):
@@ -299,7 +299,7 @@ class cctbot(znc.Module):
                 session.commit()
                 if win_hist:
                     self.PutIRC("PRIVMSG {} :WINNER >>> ** {} **  |  \
-                        EVE char(s):  {}  |  Total wins: {}  |  Last win:  {}"
+                    EVE char(s):  {}  |  Total wins: {}  |  Last win:  {}"
                                 .format(
                                     chan,
                                     winner[0].title(),
@@ -309,7 +309,7 @@ class cctbot(znc.Module):
                                 ))
                 else:
                     self.PutIRC("PRIVMSG {} :WINNER >>> ** {} **  |  \
-                        EVE char(s):  {}  |  FIRST WIN!"
+                    EVE char(s):  {}  |  FIRST WIN!"
                                 .format(
                                     chan,
                                     winner[0].title(),
@@ -317,7 +317,7 @@ class cctbot(znc.Module):
                                 ))
             else:
                 self.PutIRC("PRIVMSG {} :@{}  There are * {} * entrants. Get 5\
-                    or more before rolling. EVE am ded?!"
+                 or more before rolling. EVE am ded?!"
                             .format(chan, nick, c))
 
         # >>>>>>>>>>>> funcs end <<<<<<<<<<<<
@@ -331,13 +331,14 @@ class cctbot(znc.Module):
         r_cctroll = re.compile("^!cctroll$", re.IGNORECASE)
         r_cctcount = re.compile("^!cctcount$", re.IGNORECASE)
         r_cctremove = re.compile("^!cctremove$", re.IGNORECASE)
-        r_cctdummy = re.compile("^!cctdummy$", re.IGNORECASE)
+        # r_cctdummy = re.compile("^!cctdummy$", re.IGNORECASE)
         r_cctchar = re.compile("^!cctchar$", re.IGNORECASE)
         r_cctchars = re.compile("^!cctchars$", re.IGNORECASE)
         r_cctwins = re.compile("^!cctwins$", re.IGNORECASE)
         r_cctdelete = re.compile("^!cctdelete$", re.IGNORECASE)
         r_ccthelp = re.compile("^!ccthelp$", re.IGNORECASE)
-        r_ADMIN = re.compile("^anarchicuk$", re.IGNORECASE)
+        # r_ADMIN = re.compile("^anarchicuk$", re.IGNORECASE)
+        r_ADMIN = re.compile("^zarvoxtoral$", re.IGNORECASE)
 
         chan = channel.GetName()
         nick = nick.GetNick()
@@ -349,11 +350,6 @@ class cctbot(znc.Module):
         cmd = msg_list[0]
         msg_list.remove(msg_list[0])
         char = " ".join(msg_list)
-
-        # msg_list = msg.split(" ")
-        # cmd = msg_list[0]
-        # msg_list.remove(msg_list[0])
-        # char = " ".join(msg_list)
 
         access_denied = [
             "Facial scan failed to detect features of malnourished goat",
@@ -382,7 +378,8 @@ class cctbot(znc.Module):
         elif r_cctwins.match(cmd):
             CCTwins(nick)
         elif r_ccthelp.match(cmd):
-            self.PutIRC("PRIVMSG {} :@{}  help url goes here --"
+            self.PutIRC("PRIVMSG {} :The Community Contract Clustertruck! I \
+            fly your ships/fits out of Jita 4-4! http://bit.ly/cct4ztm"
                         .format(chan, nick))
         # admin only cmds
         elif r_cctreset.match(cmd):
@@ -395,11 +392,12 @@ class cctbot(znc.Module):
                 CCTroll()
             else:
                 Accessdenied(nick)
-        elif r_cctdummy.match(cmd):
-            if r_ADMIN.match(nick):
-                CCTdummy(dummies)
-            else:
-                Accessdenied(nick)
+        # # testing and dev only cmd
+        # elif r_cctdummy.match(cmd):
+        #     if r_ADMIN.match(nick):
+        #         CCTdummy(dummies)
+        #     else:
+        #         Accessdenied(nick)
         # else:
         #     self.PutIRC("PRIVMSG {} :@{} no match".format(chan, nick))
         session.close()
